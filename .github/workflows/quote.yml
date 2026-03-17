@@ -2,7 +2,7 @@ name: Update Quote
 
 on:
   schedule:
-    - cron: "0 */6 * * *"   # runs every 6 hours
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,13 @@ jobs:
 
           random_quote=${quotes[$RANDOM % ${#quotes[@]}]}
 
-          sed -i "s|<!-- QUOTE-START -->.*<!-- QUOTE-END -->|<!-- QUOTE-START -->$random_quote<!-- QUOTE-END -->|" README.md
+          awk -v quote="$random_quote" '
+          /<!-- QUOTE-START -->/ {print; getline; print quote; next}
+          /<!-- QUOTE-END -->/ {print; next}
+          !seen {print}
+          ' README.md > temp.md
+
+          mv temp.md README.md
 
       - name: Commit changes
         run: |
