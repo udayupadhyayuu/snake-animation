@@ -1,0 +1,35 @@
+name: Update Quote
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update Quote
+        run: |
+          quotes=(
+            "🚀 Building scalable systems that solve real-world problems."
+            "💡 Code is temporary, systems are forever."
+            "⚡ Performance is a feature, not an option."
+            "🔥 Simplicity beats complexity."
+            "🧠 Think like an engineer, build like an artist."
+          )
+
+          random_quote=${quotes[$RANDOM % ${#quotes[@]}]}
+
+          sed -i "s|<!-- QUOTE-START -->.*<!-- QUOTE-END -->|<!-- QUOTE-START -->$random_quote<!-- QUOTE-END -->|" README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add README.md
+          git commit -m "update quote" || echo "No changes"
+          git push
